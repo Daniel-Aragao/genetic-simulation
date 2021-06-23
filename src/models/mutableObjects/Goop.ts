@@ -65,11 +65,11 @@ export class Goop extends Creature {
   }
 
   collide(objects: BoardObject[]): BoardObject[] {
-    if (this.isCollectionFull) {
-      objects = objects.filter((o) => !o.Id.startsWith("#Coin"));
-    }
+    // if (this.isCollectionFull) {
+    //   objects = objects.filter((o) => !o.Id.startsWith("#Coin"));
+    // }
 
-    return objects;
+    return objects.filter((o) => !o.Id.startsWith("#Coin"));
   }
   reproduce(creature: Creature): Creature[] {
     throw new Error("Method not implemented.");
@@ -133,6 +133,7 @@ export class Goop extends Creature {
     distances.forEach((distance) => {
       if (distance.distance < minDistance) {
         min = distance.p;
+        minDistance = distance.distance;
       }
     });
 
@@ -165,8 +166,9 @@ export class Goop extends Creature {
       });
 
     distances.forEach((distance) => {
-      if (distance.distance < maxDistance) {
+      if (distance.distance > maxDistance) {
         max = distance.p;
+        maxDistance = distance.distance;
       }
     });
 

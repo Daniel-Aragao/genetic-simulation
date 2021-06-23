@@ -16,7 +16,7 @@ type Collision = {
 export class Board {
   private staticObjects: StaticObject[] = [];
   private mutableObjects: MutableObject[] = [];
-  private colissions: Collision[] = [];
+  private hits: Collision[] = [];
 
   private map: BoardObject[][][] = [];
   private id: string;
@@ -133,8 +133,12 @@ export class Board {
     return false;
   }
 
-  public getCell(i: number, j: number): BoardObject[] {
-    return this.map[i][j];
+  public getCell(i: number, j: number): BoardObject[] | null {
+    if (i >= 0 && i < this.width && j >= 0 && j < this.height) {
+      return this.map[i][j];
+    }
+
+    return null;
   }
 
   public get symbolMap(): string[][] {
@@ -167,12 +171,16 @@ export class Board {
           collided = true;
         }
         colissions.forEach((colission) =>
-          this.colissions.push({ source: obj, target: colission, position: p })
+          this.hits.push({ source: obj, target: colission, position: p })
         );
       }
 
       if (!collided) {
         if (this.Splice(obj, this.map[obj.position.Y][obj.position.X])) {
+          cell.forEach((i) => {
+            this.hits.push({ source: obj, target: i, position: p });
+          });
+
           cell.push(obj);
           obj.position = p;
         }
@@ -181,7 +189,7 @@ export class Board {
   }
 
   act() {
-    this.colissions = [];
+    this.hits = [];
 
     this.mutableObjects.forEach((obj) => {
       this.move(obj, obj.act());
@@ -191,19 +199,17 @@ export class Board {
   }
 
   processHit() {
-    if (this.colissions.length > 0) {
-      this.colissions
-        .filter((colission) =>
-          colission.target.position.equals(colission.position)
-        )
-        .forEach((colission) => {
+    if (this.hits.length > 0) {
+      this.hits
+        .filter((hit) => hit.target.position.equals(hit.position))
+        .forEach((hit) => {
           Log.print(
-            `Colission : ${this.Id} : ${colission.source.BoardId} : ${colission.source.Id}=>${colission.target.Id} : ${colission.target.BoardId}`
+            `Colission : ${this.Id} : ${hit.source.BoardId} : ${hit.source.Id}=>${hit.target.Id} : ${hit.target.BoardId}`
           );
 
-          if (colission.target.BoardId == this.Id) {
-            colission.source.hitIt(colission.target);
-            colission.target.hitBy(colission.source);
+          if (hit.target.BoardId == this.Id) {
+            hit.source.hitIt(hit.target);
+            hit.target.hitBy(hit.source);
           }
         });
     }

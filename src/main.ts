@@ -9,13 +9,14 @@ import { Coin } from "./models/staticObjects/Coin";
 
 let width = 40;
 let height = 40;
-let goops = 2;
 let iterations = 500;
 let fps = 10;
 let coinDensity = 0.025;
 let coinNumber = parseInt((width * height * coinDensity).toString());
 let sizeSuperiority = 1.2;
-let sense = 25;
+let sense = 3;
+let size = 1;
+let step = 1;
 let goopsQuantity = 1;
 let collectLimit = 0;
 
@@ -34,7 +35,11 @@ new Counter().count(goopsQuantity, (i) => {
   let x = Random.getRandomInt(1, width - 1);
   let y = Random.getRandomInt(1, height - 1);
 
-  let goop = new Goop(i, new Point(x, y), { sense: 1, size: 1, step: 1 }); //, i.toString());
+  let goop = new Goop(i, new Point(x, y), {
+    sense: sense,
+    size: size,
+    step: step,
+  }); //, i.toString());
   goop.collectionLimit = collectLimit;
   board.addMutableObject(goop);
 
