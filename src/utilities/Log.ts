@@ -3,7 +3,7 @@ export class Log {
 
   static print(...data: any[]) {
     if (this.toLog) {
-      console.log(data);
+      console.log(...data);
     }
   }
 }

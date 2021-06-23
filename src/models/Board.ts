@@ -1,4 +1,6 @@
 import { Counter } from "../utilities/Counter";
+import { GUIDGenerator } from "../utilities/GUIDGenerator";
+import { Log } from "../utilities/Log";
 import { BoardObject } from "./BoardObject";
 import { MutableObject } from "./mutableObjects/MutableObject";
 import { Point } from "./Point";
@@ -17,6 +19,11 @@ export class Board {
   private colissions: Collision[] = [];
 
   private map: BoardObject[][][] = [];
+  private id: string;
+
+  public get Id() {
+    return this.id;
+  }
   /**
    *
    */
@@ -26,6 +33,8 @@ export class Board {
     walls: boolean = false
   ) {
     this.resetMap(walls);
+    this.id = GUIDGenerator.guid;
+    this.addObject.bind(this);
   }
 
   public get Width() {
@@ -53,7 +62,11 @@ export class Board {
     }
   }
 
-  private kill(obj: BoardObject, objs: BoardObject[]) {
+  public isCellEmpty(p: Point) {
+    return this.map[p.Y][p.X].length == 0;
+  }
+
+  private Splice(obj: BoardObject, objs: BoardObject[]) {
     var index = objs.findIndex((o) => o.Id == obj.Id);
 
     if (index == -1) return false;
@@ -63,24 +76,40 @@ export class Board {
     return true;
   }
 
-  killStatic(obj: BoardObject): boolean {
-    if (this.kill(obj, this.map[obj.position.Y][obj.position.X])) {
-      return this.kill(obj, this.staticObjects);
+  private killStatic(obj: StaticObject): boolean {
+    if (this.Splice(obj, this.map[obj.position.Y][obj.position.X])) {
+      return this.Splice(obj, this.staticObjects);
     }
 
     return false;
   }
 
-  killMutable(obj: BoardObject): boolean {
-    if (this.kill(obj, this.map[obj.position.Y][obj.position.X])) {
-      return this.kill(obj, this.mutableObjects);
+  private killMutable(obj: MutableObject): boolean {
+    if (this.Splice(obj, this.map[obj.position.Y][obj.position.X])) {
+      return this.Splice(obj, this.mutableObjects);
     }
 
     return false;
   }
 
-  addObject(obj: BoardObject) {
+  killObject(obj: BoardObject): boolean {
+    var result = false;
+
+    if (this.staticObjects.findIndex((o) => o.Id == obj.Id) >= 0) {
+      result = this.killStatic(obj as StaticObject);
+    } else if (this.mutableObjects.findIndex((o) => o.Id == obj.Id) >= 0) {
+      result = this.killMutable(obj as MutableObject);
+    }
+
+    obj.Kill = result;
+
+    return result;
+  }
+
+  private addObject(obj: BoardObject) {
     this.map[obj.position.Y][obj.position.X].push(obj);
+    obj.Board = this;
+    Log.print(obj.BoardId);
   }
 
   addStaticObject(obj: StaticObject): boolean {
@@ -128,17 +157,17 @@ export class Board {
       let collided = false;
 
       if (cell.length != 0) {
-        collided = true;
-
         let colissions = obj.collide(cell);
-
+        if (colissions.length > 0) {
+          collided = true;
+        }
         colissions.forEach((colission) =>
           this.colissions.push({ source: obj, target: colission, position: p })
         );
       }
 
       if (!collided) {
-        if (this.kill(obj, this.map[obj.position.Y][obj.position.X])) {
+        if (this.Splice(obj, this.map[obj.position.Y][obj.position.X])) {
           cell.push(obj);
           obj.position = p;
         }
@@ -163,8 +192,17 @@ export class Board {
           colission.target.position.equals(colission.position)
         )
         .forEach((colission) => {
-          colission.source.hitIt(colission.target);
-          colission.target.hitBy(colission.source);
+          Log.print(
+            `Colission : ${this.Id} : ${colission.source.BoardId} : ${colission.source.Id}=>${colission.target.Id} : ${colission.target.BoardId}`
+          );
+
+          if (colission.target.BoardId == this.Id) {
+            Log.print("kill confirmed");
+            colission.source.hitIt(colission.target);
+            colission.target.hitBy(colission.source);
+          } else {
+            Log.print("kill not confirmed");
+          }
         });
     }
   }
