@@ -20,6 +20,7 @@ export class Board {
 
   private map: BoardObject[][][] = [];
   private id: string;
+  public sizeSuperiority: number = 0;
 
   public get Id() {
     return this.id;
@@ -132,6 +133,10 @@ export class Board {
     return false;
   }
 
+  public getCell(i: number, j: number): BoardObject[] {
+    return this.map[i][j];
+  }
+
   public get symbolMap(): string[][] {
     let result: string[][] = [];
 
@@ -197,11 +202,8 @@ export class Board {
           );
 
           if (colission.target.BoardId == this.Id) {
-            Log.print("kill confirmed");
             colission.source.hitIt(colission.target);
             colission.target.hitBy(colission.source);
-          } else {
-            Log.print("kill not confirmed");
           }
         });
     }

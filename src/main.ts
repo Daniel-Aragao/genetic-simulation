@@ -14,20 +14,28 @@ let iterations = 500;
 let fps = 10;
 let coinDensity = 0.025;
 let coinNumber = parseInt((width * height * coinDensity).toString());
+let sizeSuperiority = 1.2;
+let sense = 25;
+let goopsQuantity = 1;
+let collectLimit = 0;
+
 let render = true;
-Log.toLog = false;
+Log.toLog = true;
+Log.priority = 2;
 
 let board = new Board(width, height, true);
+board.sizeSuperiority = sizeSuperiority;
+
 let renderer = new ConsoleRenderer(board);
 
 let goopsList: Goop[] = [];
 
-new Counter().count(10, (i) => {
+new Counter().count(goopsQuantity, (i) => {
   let x = Random.getRandomInt(1, width - 1);
   let y = Random.getRandomInt(1, height - 1);
 
-  let goop = new Goop(i, new Point(x, y)); //, i.toString());
-  goop.collectionLimit = 4;
+  let goop = new Goop(i, new Point(x, y), { sense: 1, size: 1, step: 1 }); //, i.toString());
+  goop.collectionLimit = collectLimit;
   board.addMutableObject(goop);
 
   goopsList.push(goop);
@@ -50,7 +58,7 @@ function coinsInfo() {
     coins += goop.Collection.filter((o) => o.Id.startsWith("#Coin")).length;
   });
 
-  console.log(`Coins: ${coins}/${coinNumber}`);
+  Log.print1(`Coins: ${coins}/${coinNumber}`);
 }
 
 let intId = setInterval(() => {

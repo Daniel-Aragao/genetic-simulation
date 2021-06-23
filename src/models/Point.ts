@@ -18,4 +18,12 @@ export class Point {
   clone() {
     return new Point(this.X, this.Y);
   }
+
+  distance(p: Point): number {
+    return this.distanceCoordinates(p.X, p.y);
+  }
+
+  distanceCoordinates(x: number, y: number): number {
+    return Math.sqrt(Math.pow(this.X - x, 2) + Math.pow(this.Y - y, 2));
+  }
 }

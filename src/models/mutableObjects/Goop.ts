@@ -3,7 +3,7 @@ import { Log } from "../../utilities/Log";
 import { Random } from "../../utilities/Random";
 import { BoardObject } from "../BoardObject";
 import { Point } from "../Point";
-import { Creature } from "./Creature";
+import { Creature, CreatureOptions } from "./Creature";
 import { MutableObject } from "./MutableObject";
 import { StaticObject } from "../staticObjects/StaticObject";
 
@@ -44,8 +44,12 @@ export class Goop extends Creature {
   /**
    *
    */
-  constructor(id: number, position: Point, symbol: string = "○") {
-    super(id, position, symbol);
+  constructor(
+    id: number,
+    position: Point,
+    options: CreatureOptions | null = null
+  ) {
+    super(id, position, "○", options);
   }
 
   public addToCollection(obj: BoardObject): boolean {
@@ -70,9 +74,27 @@ export class Goop extends Creature {
   reproduce(creature: Creature): Creature[] {
     throw new Error("Method not implemented.");
   }
+
   act(): Point {
+    let objs = this.sense();
+
+    if (this.board?.sizeSuperiority) {
+      let runFromPoint = this.run(objs);
+
+      if (runFromPoint) {
+        return this.stepAway(runFromPoint);
+      }
+    }
+
+    let followPoint = this.follow(objs);
+
+    if (followPoint) {
+      return this.stepInto(followPoint);
+    }
+
     let x = this.getRandomMovement(this.position.X);
     let y = this.getRandomMovement(this.position.Y);
+
     return new Point(x, y);
   }
 
@@ -92,7 +114,62 @@ export class Goop extends Creature {
     }
   }
 
-  private getRandomMovement(start: number) {
-    return Random.getRandomInt(start - 1, start + 2);
+  private follow(objs: BoardObject[]): Point | null {
+    if (this.isCollectionFull) return null;
+
+    let distances: { p: Point; distance: number }[] = [];
+    let min: Point | null = null;
+    let minDistance = this.board?.Width ?? Number.MAX_VALUE;
+
+    objs
+      .filter((o) => o.Id.startsWith("#Coin"))
+      .forEach((coin) => {
+        distances.push({
+          p: coin.position,
+          distance: this.position.distance(coin.position),
+        });
+      });
+
+    distances.forEach((distance) => {
+      if (distance.distance < minDistance) {
+        min = distance.p;
+      }
+    });
+
+    if (min) {
+      Log.print2(
+        `Follow: ${this.Id} : ${(min as Point).X} ${(min as Point).Y}`
+      );
+    }
+
+    return min;
+  }
+
+  private run(objs: BoardObject[]): Point | null {
+    let distances: { p: Point; distance: number }[] = [];
+    let max: Point | null = null;
+    let maxDistance = Number.MIN_VALUE;
+
+    objs
+      .filter((o) => o.Id.startsWith("#Creature"))
+      .forEach((creature, i: number) => {
+        let c = creature as Creature;
+        if (c.Size * (this.board?.sizeSuperiority ?? 0) > this.Size) {
+          let weight = c.Size / this.Size;
+
+          distances.push({
+            p: creature.position,
+            distance: this.position.distance(creature.position) * weight,
+          });
+        }
+      });
+
+    distances.forEach((distance) => {
+      if (distance.distance < maxDistance) {
+        max = distance.p;
+      }
+    });
+
+    return max;
   }
 }
