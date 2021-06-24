@@ -2,6 +2,7 @@ import { BoardObject } from "../BoardObject";
 import { MutableObject } from "./MutableObject";
 import { Point } from "../Point";
 import { Random } from "../../utilities/Random";
+import { Log } from "../../utilities/Log";
 
 export type CreatureOptions = {
   size: number;
@@ -49,21 +50,23 @@ export abstract class Creature extends MutableObject {
   protected sense(): BoardObject[] {
     let result: BoardObject[] = [];
 
-    let minY = this.position.Y - this.senseSize;
-    let maxY = this.position.Y + this.senseSize;
-    let minX = this.position.X - this.senseSize;
-    let maxX = this.position.X + this.senseSize;
+    if (this.senseSize) {
+      let minY = this.position.Y - this.senseSize;
+      let maxY = this.position.Y + this.senseSize;
+      let minX = this.position.X - this.senseSize;
+      let maxX = this.position.X + this.senseSize;
 
-    for (let i = minY; i <= maxY; i++) {
-      for (let j = minX; j <= maxX; j++) {
-        let cell = this.board?.getCell(i, j);
+      for (let i = minY; i <= maxY; i++) {
+        for (let j = minX; j <= maxX; j++) {
+          let cell = this.board?.getCell(i, j);
 
-        if (cell && cell.length > 0) {
-          cell.forEach((o) => {
-            if (o.Id != this.Id) {
-              result.push(o);
-            }
-          });
+          if (cell && cell.length > 0) {
+            cell.forEach((o) => {
+              if (o.Id != this.Id) {
+                result.push(o);
+              }
+            });
+          }
         }
       }
     }
@@ -82,7 +85,13 @@ export abstract class Creature extends MutableObject {
         j <= this.position.X + this.Step;
         j++
       ) {
-        cb(i, j);
+        if (!this.position.equals(new Point(j, i))) {
+          let cell = this.board?.getCell(i, j);
+
+          if (cell) {
+            cb(i, j);
+          }
+        }
       }
     }
   }
@@ -95,10 +104,11 @@ export abstract class Creature extends MutableObject {
       let minDistance = this.board?.Width ?? Number.MAX_VALUE;
 
       this.stepIter((i, j) => {
-        let distance = this.position.distanceCoordinates(j, i);
+        let distance = p.distanceCoordinates(j, i);
 
         if (distance < minDistance) {
           min = new Point(j, i);
+          minDistance = distance;
         }
       });
 
@@ -114,10 +124,11 @@ export abstract class Creature extends MutableObject {
       let maxDistance = Number.MIN_VALUE;
 
       this.stepIter((i, j) => {
-        let distance = this.position.distanceCoordinates(j, i);
+        let distance = p.distanceCoordinates(j, i);
 
         if (distance > maxDistance) {
           max = new Point(j, i);
+          maxDistance = distance;
         }
       });
 

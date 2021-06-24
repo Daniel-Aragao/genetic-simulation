@@ -56,10 +56,9 @@ export class Goop extends Creature {
     if (!this.isCollectionFull) {
       this.collected.push(obj);
       this.setFullnessSymbol();
-      Log.print("Eat");
+
       return true;
     }
-    Log.print("Not Eat");
 
     return false;
   }
@@ -89,8 +88,12 @@ export class Goop extends Creature {
     let followPoint = this.follow(objs);
 
     if (followPoint) {
-      return this.stepInto(followPoint);
+      let step = this.stepInto(followPoint);
+      Log.print(`Step: ${this.Id} : ${step.X} ${step.Y}`);
+      return step;
     }
+
+    this.setFullnessSymbol();
 
     let x = this.getRandomMovement(this.position.X);
     let y = this.getRandomMovement(this.position.Y);
@@ -138,9 +141,8 @@ export class Goop extends Creature {
     });
 
     if (min) {
-      Log.print2(
-        `Follow: ${this.Id} : ${(min as Point).X} ${(min as Point).Y}`
-      );
+      this.symbol = "💰";
+      Log.print(`Follow: ${this.Id} : ${(min as Point).X} ${(min as Point).Y}`);
     }
 
     return min;
@@ -171,6 +173,11 @@ export class Goop extends Creature {
         maxDistance = distance.distance;
       }
     });
+
+    if (max) {
+      this.symbol = "🏃";
+      Log.print(`Run: ${this.Id} : ${(max as Point).X} ${(max as Point).Y}`);
+    }
 
     return max;
   }

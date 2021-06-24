@@ -159,30 +159,36 @@ export class Board {
     return result;
   }
 
-  private move(obj: MutableObject, p: Point) {
-    if (!obj.position.equals(p)) {
-      let cell = this.map[p.Y][p.X];
+  private move(obj: MutableObject, newPosition: Point) {
+    if (!obj.position.equals(newPosition)) {
+      let cell = this.map[newPosition.Y][newPosition.X];
 
       let collided = false;
 
       if (cell.length != 0) {
         let colissions = obj.collide(cell);
+
         if (colissions.length > 0) {
           collided = true;
         }
+
         colissions.forEach((colission) =>
-          this.hits.push({ source: obj, target: colission, position: p })
+          this.hits.push({
+            source: obj,
+            target: colission,
+            position: newPosition,
+          })
         );
       }
 
       if (!collided) {
         if (this.Splice(obj, this.map[obj.position.Y][obj.position.X])) {
           cell.forEach((i) => {
-            this.hits.push({ source: obj, target: i, position: p });
+            this.hits.push({ source: obj, target: i, position: newPosition });
           });
 
           cell.push(obj);
-          obj.position = p;
+          obj.position = newPosition;
         }
       }
     }
@@ -204,7 +210,7 @@ export class Board {
         .filter((hit) => hit.target.position.equals(hit.position))
         .forEach((hit) => {
           Log.print(
-            `Colission : ${this.Id} : ${hit.source.BoardId} : ${hit.source.Id}=>${hit.target.Id} : ${hit.target.BoardId}`
+            `Hit : ${this.Id} : ${hit.source.BoardId} : ${hit.source.Id}=>${hit.target.Id} : ${hit.target.BoardId}`
           );
 
           if (hit.target.BoardId == this.Id) {

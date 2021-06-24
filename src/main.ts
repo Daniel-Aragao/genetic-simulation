@@ -17,12 +17,12 @@ let sizeSuperiority = 1.2;
 let sense = 3;
 let size = 1;
 let step = 1;
-let goopsQuantity = 1;
+let goopsQuantity = 5;
 let collectLimit = 0;
 
 let render = true;
 Log.toLog = true;
-Log.priority = 2;
+Log.priority = 1;
 
 let board = new Board(width, height, true);
 board.sizeSuperiority = sizeSuperiority;

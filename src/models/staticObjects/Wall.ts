@@ -10,7 +10,7 @@ export class Wall extends StaticObject {
   /**
    *
    */
-  constructor(id: number, position: Point, symbol: string = "W") {
+  constructor(id: number, position: Point, symbol: string = "▇▇") {
     super(`#Wall${id}`, position, symbol);
   }
 

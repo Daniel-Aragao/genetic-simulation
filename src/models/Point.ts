@@ -20,7 +20,7 @@ export class Point {
   }
 
   distance(p: Point): number {
-    return this.distanceCoordinates(p.X, p.y);
+    return this.distanceCoordinates(p.X, p.Y);
   }
 
   distanceCoordinates(x: number, y: number): number {
