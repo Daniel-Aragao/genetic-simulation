@@ -160,7 +160,9 @@ export class Board {
   }
 
   private move(obj: MutableObject, newPosition: Point) {
-    let cell = this.map[newPosition.Y][newPosition.X];
+    let cell = this.map[newPosition.Y]?.[newPosition.X];
+
+    if (!cell) return;
 
     let collided = false;
 

@@ -38,7 +38,11 @@ export abstract class Creature extends MutableObject {
     symbol: string = "C",
     options: CreatureOptions | null = null
   ) {
-    super(`${Creature.ID_PREFIX}${id}`, position, symbol);
+    super(
+      `${Creature.ID_PREFIX}${id.toString().padStart(3, "0")}`,
+      position,
+      symbol
+    );
 
     this.size = options?.size ?? 1;
     this.step = options?.step ?? 1;
@@ -46,6 +50,10 @@ export abstract class Creature extends MutableObject {
   }
 
   abstract reproduce(creature: Creature): Creature[];
+
+  protected isThreat(creature: Creature): boolean {
+    return this.Size * (this.board?.sizeSuperiority ?? 0) < creature.Size;
+  }
 
   protected getRandomMovement(start: number) {
     return Random.getRandomInt(start - this.step, start + this.step + 1);

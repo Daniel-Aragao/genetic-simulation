@@ -7,17 +7,17 @@ import { Counter } from "./utilities/Counter";
 import { Random } from "./utilities/Random";
 import { Coin } from "./models/staticObjects/Coin";
 
-let width = 40;
-let height = 40;
+let width = 50;
+let height = 50;
 let iterations = 500;
-let fps = 10;
-let coinDensity = 0.5; //0.025;
+let fps = 5;
+let coinDensity = 0.025;
 let coinsNumber = parseInt((width * height * coinDensity).toString());
 let sizeSuperiority = 1.2;
 let sense = 3;
 let size = 1;
 let step = 1;
-let goopsQuantity = 30;
+let goopsQuantity = 15;
 let collectLimit = 0;
 
 let render = true;
@@ -37,9 +37,9 @@ new Counter().count(goopsQuantity, (i) => {
 
   let goop = new Goop(i, new Point(x, y), {
     sense: sense,
-    size: size,
-    step: step,
-  }); //, i.toString());
+    size: Random.getRandomInt(size, 3),
+    step: Random.getRandomInt(step, 3),
+  });
   goop.collectionLimit = collectLimit;
   board.addMutableObject(goop);
 
@@ -75,11 +75,17 @@ function goopsInfo() {
   goopsList.forEach((goop) => {
     let txt = `${goop.Id}(${goop.position.X.toString().padStart(
       2,
-      "0"
+      " "
     )}, ${goop.position.Y.toString().padStart(
       2,
-      "0"
-    )})[${goop.CoinsCollected.toString().padStart(3, "0")}] `;
+      " "
+    )})[${goop.AcquiredAmount.toString().padStart(
+      3,
+      " "
+    )}/${goop.LostAmount.toString().padStart(
+      3,
+      " "
+    )}/${goop.CoinsCollected.toString().padStart(3, " ")}] `;
 
     if (txt.length + line.length > lineSize) {
       Log.print1(line);

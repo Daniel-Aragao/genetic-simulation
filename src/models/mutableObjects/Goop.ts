@@ -9,36 +9,54 @@ import { StaticObject } from "../staticObjects/StaticObject";
 import { Coin } from "../staticObjects/Coin";
 
 export class Goop extends Creature {
-  private collected: BoardObject[] = [];
+  private collection: BoardObject[] = [];
   public collectionLimit = 0;
+  private robEntry: { Id: string; coins: number }[] = [];
 
   public get isCollectionFull() {
     return this.collectionLimit
-      ? this.collected.length >= this.collectionLimit
+      ? this.collection.length >= this.collectionLimit
       : false;
   }
 
   public get Collection() {
-    return this.collected.map((i) => i);
+    return this.collection.map((i) => i);
   }
 
   public get CoinsCollected() {
-    return this.Collection.filter((o) => o.Id.startsWith(Coin.ID_PREFIX))
-      .length;
+    return this.GetCoinsCollected.length;
+  }
+
+  public get GetCoinsCollected() {
+    return this.Collection.filter((o) => o.Id.startsWith(Coin.ID_PREFIX));
+  }
+
+  public get AcquiredAmount() {
+    return this.robEntry.reduce(
+      (p, c, i) => (c.coins > 0 ? c.coins : 0) + p,
+      0
+    );
+  }
+
+  public get LostAmount() {
+    return this.robEntry.reduce(
+      (p, c, i) => (c.coins > 0 ? 0 : c.coins * -1) + p,
+      0
+    );
   }
 
   private symbols = ["○", "◔", "◕", "●"];
 
   private setFullnessSymbol() {
     if (this.collectionLimit == 0) {
-      if (this.collected.length == 0) {
+      if (this.collection.length == 0) {
         this.symbol = this.symbols[0];
       } else {
         this.symbol = this.symbols[3];
       }
     } else if (!this.isCollectionFull) {
       let fullness =
-        (this.collected.length / this.collectionLimit) * this.symbols.length;
+        (this.collection.length / this.collectionLimit) * this.symbols.length;
 
       fullness = Math.floor(fullness);
       this.symbol = this.symbols[fullness % this.symbols.length];
@@ -60,7 +78,7 @@ export class Goop extends Creature {
 
   public addToCollection(obj: BoardObject): boolean {
     if (!this.isCollectionFull) {
-      this.collected.push(obj);
+      this.collection.push(obj);
       this.setFullnessSymbol();
 
       return true;
@@ -120,7 +138,30 @@ export class Goop extends Creature {
           throw Error(`Coin should be consumed: ${this.Id}:${object.Id}`);
         }
       }
+    } else if (object.Id.startsWith(Creature.ID_PREFIX)) {
+      if (this.board?.sizeSuperiority) {
+        if ((object as Goop).isThreat(this)) {
+          this.rob(object as Goop);
+        }
+      }
     }
+  }
+
+  private rob(goop: Goop) {
+    let coins = goop.CoinsCollected;
+    if (coins) {
+      this.robEntry.push({ Id: goop.Id, coins: coins });
+      goop.robEntry.push({ Id: goop.Id, coins: -coins });
+      goop.GetCoinsCollected.forEach((coin) => {
+        this.collection.push(coin);
+        goop.dropCoin(coin);
+      });
+    }
+  }
+
+  private dropCoin(coin: Coin) {
+    let index = this.collection.findIndex((c) => c.Id == coin.Id);
+    this.collection.splice(index, 1);
   }
 
   private follow(objs: BoardObject[]): Point | null {
@@ -164,7 +205,7 @@ export class Goop extends Creature {
       .forEach((c) => {
         let creature = c as Creature;
 
-        if (this.Size * (this.board?.sizeSuperiority ?? 0) < creature.Size) {
+        if (this.isThreat(creature) && this.CoinsCollected > 0) {
           let weight = creature.Size / this.Size;
 
           distances.push({
