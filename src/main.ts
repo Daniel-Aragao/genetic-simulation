@@ -11,13 +11,13 @@ let width = 40;
 let height = 40;
 let iterations = 500;
 let fps = 10;
-let coinDensity = 0.025;
-let coinNumber = parseInt((width * height * coinDensity).toString());
+let coinDensity = 0.5; //0.025;
+let coinsNumber = parseInt((width * height * coinDensity).toString());
 let sizeSuperiority = 1.2;
 let sense = 3;
 let size = 1;
 let step = 1;
-let goopsQuantity = 5;
+let goopsQuantity = 30;
 let collectLimit = 0;
 
 let render = true;
@@ -46,7 +46,7 @@ new Counter().count(goopsQuantity, (i) => {
   goopsList.push(goop);
 });
 
-new Counter().count(coinNumber, (i) => {
+new Counter().count(coinsNumber, (i) => {
   let x = Random.getRandomInt(1, width - 1);
   let y = Random.getRandomInt(1, height - 1);
 
@@ -56,25 +56,56 @@ new Counter().count(coinNumber, (i) => {
 
 let gameCounter = new Counter(1);
 
-function coinsInfo() {
+function coinsInfo(): number {
   let coins = 0;
 
   goopsList.forEach((goop) => {
-    coins += goop.Collection.filter((o) => o.Id.startsWith("#Coin")).length;
+    coins += goop.CoinsCollected;
   });
 
-  Log.print1(`Coins: ${coins}/${coinNumber}`);
+  Log.print1(`Coins: ${coins}/${coinsNumber}`);
+
+  return coinsNumber - coins;
 }
 
+function goopsInfo() {
+  var line = "";
+  var lineSize = width * 3;
+
+  goopsList.forEach((goop) => {
+    let txt = `${goop.Id}(${goop.position.X.toString().padStart(
+      2,
+      "0"
+    )}, ${goop.position.Y.toString().padStart(
+      2,
+      "0"
+    )})[${goop.CoinsCollected.toString().padStart(3, "0")}] `;
+
+    if (txt.length + line.length > lineSize) {
+      Log.print1(line);
+      line = txt;
+    } else {
+      line += txt;
+    }
+  });
+
+  if (line) {
+    Log.print1(line);
+  }
+}
+
+var remainingCoins = coinsNumber;
+
 let intId = setInterval(() => {
-  if (gameCounter.next < iterations) {
+  if (gameCounter.next < iterations && remainingCoins) {
     if (render) {
       renderer.render();
     }
-    coinsInfo();
+    remainingCoins = coinsInfo();
+    goopsInfo();
     board.act();
   } else {
-    coinsInfo();
+    // coinsInfo();
     clearInterval(intId);
   }
 }, 1000 / fps);

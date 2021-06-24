@@ -7,11 +7,16 @@ export class Coin extends StaticObject {
   collide(object: BoardObject[]): BoardObject[] {
     throw new Error("Method not implemented.");
   }
+
+  public static get ID_PREFIX() {
+    return "#Coin";
+  }
+
   /**
    *
    */
   constructor(id: number, position: Point, symbol: string = ".") {
-    super(`#Coin${id}`, position, symbol);
+    super(`${Coin.ID_PREFIX}${id}`, position, symbol);
   }
 
   hitBy(object: BoardObject): void {

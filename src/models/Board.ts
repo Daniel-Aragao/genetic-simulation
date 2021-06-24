@@ -134,7 +134,7 @@ export class Board {
   }
 
   public getCell(i: number, j: number): BoardObject[] | null {
-    if (i >= 0 && i < this.width && j >= 0 && j < this.height) {
+    if (i >= 0 && i < this.height && j >= 0 && j < this.width) {
       return this.map[i][j];
     }
 
@@ -160,11 +160,11 @@ export class Board {
   }
 
   private move(obj: MutableObject, newPosition: Point) {
+    let cell = this.map[newPosition.Y][newPosition.X];
+
+    let collided = false;
+
     if (!obj.position.equals(newPosition)) {
-      let cell = this.map[newPosition.Y][newPosition.X];
-
-      let collided = false;
-
       if (cell.length != 0) {
         let colissions = obj.collide(cell);
 
@@ -180,16 +180,18 @@ export class Board {
           })
         );
       }
+    }
 
-      if (!collided) {
-        if (this.Splice(obj, this.map[obj.position.Y][obj.position.X])) {
-          cell.forEach((i) => {
+    if (!collided) {
+      if (this.Splice(obj, this.map[obj.position.Y][obj.position.X])) {
+        cell.forEach((i) => {
+          if (obj.Id != i.Id) {
             this.hits.push({ source: obj, target: i, position: newPosition });
-          });
+          }
+        });
 
-          cell.push(obj);
-          obj.position = newPosition;
-        }
+        cell.push(obj);
+        obj.position = newPosition;
       }
     }
   }

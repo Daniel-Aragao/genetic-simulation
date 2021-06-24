@@ -33,6 +33,8 @@ export class ConsoleRenderer {
 
       console.log(str);
     }
+
+    console.log();
   }
 
   private makeHeader() {

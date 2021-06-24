@@ -33,6 +33,10 @@ export abstract class BoardObject {
     }
   }
 
+  public static get ID_PREFIX() {
+    return "";
+  }
+
   /**
    *
    */

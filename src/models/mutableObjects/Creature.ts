@@ -25,6 +25,10 @@ export abstract class Creature extends MutableObject {
     return this.senseSize;
   }
 
+  public static override get ID_PREFIX() {
+    return "#Creature";
+  }
+
   /**
    *
    */
@@ -34,7 +38,7 @@ export abstract class Creature extends MutableObject {
     symbol: string = "C",
     options: CreatureOptions | null = null
   ) {
-    super(`#Creature${id}`, position, symbol);
+    super(`${Creature.ID_PREFIX}${id}`, position, symbol);
 
     this.size = options?.size ?? 1;
     this.step = options?.step ?? 1;

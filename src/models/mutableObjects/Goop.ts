@@ -6,6 +6,7 @@ import { Point } from "../Point";
 import { Creature, CreatureOptions } from "./Creature";
 import { MutableObject } from "./MutableObject";
 import { StaticObject } from "../staticObjects/StaticObject";
+import { Coin } from "../staticObjects/Coin";
 
 export class Goop extends Creature {
   private collected: BoardObject[] = [];
@@ -19,6 +20,11 @@ export class Goop extends Creature {
 
   public get Collection() {
     return this.collected.map((i) => i);
+  }
+
+  public get CoinsCollected() {
+    return this.Collection.filter((o) => o.Id.startsWith(Coin.ID_PREFIX))
+      .length;
   }
 
   private symbols = ["○", "◔", "◕", "●"];
@@ -65,10 +71,10 @@ export class Goop extends Creature {
 
   collide(objects: BoardObject[]): BoardObject[] {
     // if (this.isCollectionFull) {
-    //   objects = objects.filter((o) => !o.Id.startsWith("#Coin"));
+    //   objects = objects.filter((o) => !o.Id.startsWith(Coin.ID_PREFIX));
     // }
 
-    return objects.filter((o) => !o.Id.startsWith("#Coin"));
+    return objects.filter((o) => !o.Id.startsWith(Coin.ID_PREFIX));
   }
   reproduce(creature: Creature): Creature[] {
     throw new Error("Method not implemented.");
@@ -108,7 +114,7 @@ export class Goop extends Creature {
   hitIt(object: BoardObject): void {
     Log.print(`Hit it: ${object.Id}`);
 
-    if (object.Id.startsWith("#Coin")) {
+    if (object.Id.startsWith(Coin.ID_PREFIX)) {
       if (this.addToCollection(object)) {
         if (!this.board?.killObject(object as StaticObject)) {
           throw Error(`Coin should be consumed: ${this.Id}:${object.Id}`);
@@ -125,7 +131,7 @@ export class Goop extends Creature {
     let minDistance = this.board?.Width ?? Number.MAX_VALUE;
 
     objs
-      .filter((o) => o.Id.startsWith("#Coin"))
+      .filter((o) => o.Id.startsWith(Coin.ID_PREFIX))
       .forEach((coin) => {
         distances.push({
           p: coin.position,
@@ -155,10 +161,11 @@ export class Goop extends Creature {
 
     objs
       .filter((o) => o.Id.startsWith("#Creature"))
-      .forEach((creature, i: number) => {
-        let c = creature as Creature;
-        if (c.Size * (this.board?.sizeSuperiority ?? 0) > this.Size) {
-          let weight = c.Size / this.Size;
+      .forEach((c) => {
+        let creature = c as Creature;
+
+        if (this.Size * (this.board?.sizeSuperiority ?? 0) < creature.Size) {
+          let weight = creature.Size / this.Size;
 
           distances.push({
             p: creature.position,
