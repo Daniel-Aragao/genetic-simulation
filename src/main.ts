@@ -7,6 +7,7 @@ import { Counter } from "./utilities/Counter";
 import { Random } from "./utilities/Random";
 import { Coin } from "./models/staticObjects/Coin";
 
+// Setup ================================================================================================
 let width = 50;
 let height = 50;
 let iterations = 500;
@@ -20,14 +21,14 @@ let step = 1;
 let goopsQuantity = 15;
 let collectLimit = 0;
 
+// Log and rendering ====================================================================================
 let render = true;
 Log.toLog = true;
 Log.priority = 1;
 
+// Creating population and board ========================================================================
 let board = new Board(width, height, true);
 board.sizeSuperiority = sizeSuperiority;
-
-let renderer = new ConsoleRenderer(board);
 
 let goopsList: Goop[] = [];
 
@@ -54,7 +55,7 @@ new Counter().count(coinsNumber, (i) => {
   board.addStaticObject(coin);
 });
 
-let gameCounter = new Counter(1);
+// Creating info extraction functions ===================================================================
 
 function coinsInfo(): number {
   let coins = 0;
@@ -100,7 +101,11 @@ function goopsInfo() {
   }
 }
 
+// Game loop ============================================================================================
 var remainingCoins = coinsNumber;
+
+let renderer = new ConsoleRenderer(board);
+let gameCounter = new Counter(1);
 
 let intId = setInterval(() => {
   if (gameCounter.next < iterations && remainingCoins) {
