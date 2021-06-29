@@ -9,16 +9,16 @@ import { Coin } from "./models/staticObjects/Coin";
 
 // Setup ================================================================================================
 let width = 50;
-let height = 50;
+let height = 40;
 let iterations = 500;
-let fps = 5;
+let fps = 10;
 let coinDensity = 0.025;
 let coinsNumber = parseInt((width * height * coinDensity).toString());
 let sizeSuperiority = 1.2;
 let sense = 3;
 let size = 1;
 let step = 1;
-let goopsQuantity = 15;
+let goopsQuantity = 16;
 let collectLimit = 0;
 
 // Log and rendering ====================================================================================
@@ -113,6 +113,7 @@ let intId = setInterval(() => {
       renderer.render();
     }
     remainingCoins = coinsInfo();
+    Log.print1(`Iterations: ${gameCounter.current}/${iterations}`);
     goopsInfo();
     board.act();
   } else {
